@@ -19,8 +19,8 @@ import java.util.Map;
  * del caché en lugar de propagar el error al frontend.
  *
  * Estados del circuito:
- *  - CERRADO:     Todo funciona, llamadas normales
- *  - ABIERTO:     Demasiados fallos, retorna caché
+ *  - CERRADO:      Todo funciona, llamadas normales
+ *  - ABIERTO:      Demasiados fallos, retorna caché
  *  - SEMI-ABIERTO: Probando si el servicio se recuperó
  */
 @Slf4j
@@ -31,8 +31,8 @@ public class MicroservicioClient {
     private final String kpiUrl;
     private final String datosUrl;
 
-    private Map<String, Object> cacheKpi = new HashMap<>();
-    private Map<String, Object> cacheDatos = new HashMap<>();
+    private final Map<String, Object> cacheKpi = new HashMap<>();
+    private final Map<String, Object> cacheDatos = new HashMap<>();
 
     public MicroservicioClient(
             @Value("${microservicio.kpi.url}") String kpiUrl,
@@ -43,10 +43,12 @@ public class MicroservicioClient {
         inicializarCache();
     }
 
+    @SuppressWarnings("unchecked")
     @CircuitBreaker(name = "ms-kpi", fallbackMethod = "kpiFallback")
     public Map<String, Object> obtenerKpis() {
         log.info("Consultando KPIs a MS-KPI en: {}", kpiUrl);
-        Map response = restTemplate.getForObject(kpiUrl + "/api/kpis", Map.class);
+        Map<String, Object> response = restTemplate.getForObject(
+                kpiUrl + "/api/kpis", Map.class);
         if (response != null) {
             cacheKpi.putAll(response);
             cacheKpi.put("_actualizado", true);
@@ -54,10 +56,11 @@ public class MicroservicioClient {
         return cacheKpi;
     }
 
+    @SuppressWarnings("unchecked")
     @CircuitBreaker(name = "ms-datos", fallbackMethod = "datosFallback")
     public Map<String, Object> obtenerDatos() {
         log.info("Consultando datos a MS-Datos en: {}", datosUrl);
-        Map response = restTemplate.getForObject(
+        Map<String, Object> response = restTemplate.getForObject(
                 datosUrl + "/api/datos/ventas/total", Map.class);
         if (response != null) {
             cacheDatos.putAll(response);

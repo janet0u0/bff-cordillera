@@ -1,0 +1,45 @@
+services:
+
+  # MySQL para MS-Usuarios
+  mysql-usuarios:
+    image: mysql:8.0
+    container_name: mysql-ms-usuarios
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: grupo_cordillera
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_usuarios_data:/var/lib/mysql
+
+  # MySQL para MS-KPI
+  mysql-kpi:
+    image: mysql:8.0
+    container_name: mysql-ms-kpi
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: ms_kpi_db
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql_kpi_data:/var/lib/mysql
+
+  # MySQL para MS-Datos
+  mysql-datos:
+    image: mysql:8.0
+    container_name: mysql-ms-datos
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: ms_datos_db
+    ports:
+      - "3308:3306"
+    volumes:
+      - mysql_datos_data:/var/lib/mysql
+
+volumes:
+  mysql_usuarios_data:
+  mysql_kpi_data:
+  mysql_datos_data:
