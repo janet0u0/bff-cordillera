@@ -5,100 +5,98 @@ import org.springframework.stereotype.Component;
 import java.time.LocalDateTime;
 
 /**
- * PATRÓN FACTORY METHOD
- * =====================
- * Crea el tipo correcto de DashboardDTO según el rol del usuario.
- * El Controller no necesita saber cómo se construye cada reporte.
- *
- * Roles:
- *  - EJECUTIVO:  Vista financiera de alto nivel
- *  - ANALISTA:   Vista detallada con stock y transacciones
- *  - SUPERVISOR: Vista operativa
+ * PATRÓN FACTORY METHOD - Grupo Cordillera
+ * =====================================
+ * Centraliza la creación de Dashboards personalizados por rol.
  */
 @Component
 public class ReporteFactory {
 
     /**
      * Método fábrica principal.
-     * Selecciona el tipo de reporte según el rol.
      */
     public DashboardDTO crearReporte(String rol, boolean datosEnTiempoReal) {
+        if (rol == null) return crearReporteBase("ANÓNIMO", datosEnTiempoReal);
+
         return switch (rol.toUpperCase()) {
-            case "EJECUTIVO"  -> crearReporteEjecutivo(datosEnTiempoReal);
-            case "ANALISTA"   -> crearReporteAnalista(datosEnTiempoReal);
-            case "SUPERVISOR" -> crearReporteSupervisor(datosEnTiempoReal);
-            default           -> crearReporteBase(rol, datosEnTiempoReal);
+            case "EJECUTIVO"     -> crearReporteEjecutivo(datosEnTiempoReal);
+            case "ANALISTA"      -> crearReporteAnalista(datosEnTiempoReal);
+            case "SUPERVISOR"    -> crearReporteSupervisor(datosEnTiempoReal);
+            case "ADMIN_SISTEMA" -> crearReporteAdminSistema(datosEnTiempoReal); // Agregamos tu nuevo rol
+            default              -> crearReporteBase(rol, datosEnTiempoReal);
         };
     }
 
-    // EJECUTIVO: ve KPIs + rentabilidad, NO ve stock ni transacciones
+    /**
+     * EJECUTIVO: Foco en Rentabilidad y Finanzas.
+     */
     private DashboardDTO crearReporteEjecutivo(boolean datosEnTiempoReal) {
         return DashboardDTO.builder()
-                .tipoReporte("EJECUTIVO")
+                .tipoReporte("ESTRATÉGICO")
                 .rol("EJECUTIVO")
                 .generadoEn(LocalDateTime.now())
                 .datosEnTiempoReal(datosEnTiempoReal)
-                .mensaje(datosEnTiempoReal
-                        ? "Dashboard ejecutivo en tiempo real"
-                        : "⚠ Mostrando últimos datos disponibles")
+                .mensaje(datosEnTiempoReal ? "Dashboard Ejecutivo - Tiempo Real" : "⚠ Datos en Caché")
                 .ventasTotales(125000.0)
-                .metaVentas(150000.0)
-                .porcentajeCumplimiento(83.3)
-                .estadoGeneral("AMARILLO")
                 .rentabilidadNeta(32500.0)
-                .productosStockCritico(null)
-                .transaccionesHoy(null)
+                .estadoGeneral("AMARILLO")
                 .build();
     }
 
-    // ANALISTA: ve KPIs + stock + transacciones, NO ve rentabilidad
+    /**
+     * ANALISTA: Foco en KPIs y Stock Global.
+     */
     private DashboardDTO crearReporteAnalista(boolean datosEnTiempoReal) {
         return DashboardDTO.builder()
-                .tipoReporte("ANALISTA")
+                .tipoReporte("ANALÍTICO")
                 .rol("ANALISTA")
                 .generadoEn(LocalDateTime.now())
                 .datosEnTiempoReal(datosEnTiempoReal)
-                .mensaje(datosEnTiempoReal
-                        ? "Vista analítica actualizada"
-                        : "⚠ Datos en caché")
+                .mensaje("Análisis Global de Inventario")
                 .ventasTotales(125000.0)
-                .metaVentas(150000.0)
-                .porcentajeCumplimiento(83.3)
-                .estadoGeneral("AMARILLO")
-                .rentabilidadNeta(null)
                 .productosStockCritico(12)
                 .transaccionesHoy(342)
+                .estadoGeneral("AMARILLO")
                 .build();
     }
 
-    // SUPERVISOR: ve KPIs operativos + stock + transacciones
+    /**
+     * SUPERVISOR: Foco en Operación Local.
+     */
     private DashboardDTO crearReporteSupervisor(boolean datosEnTiempoReal) {
         return DashboardDTO.builder()
-                .tipoReporte("SUPERVISOR")
+                .tipoReporte("OPERATIVO")
                 .rol("SUPERVISOR")
                 .generadoEn(LocalDateTime.now())
                 .datosEnTiempoReal(datosEnTiempoReal)
-                .mensaje(datosEnTiempoReal
-                        ? "Vista supervisión activa"
-                        : "⚠ Reconectando con microservicios")
-                .ventasTotales(125000.0)
-                .metaVentas(150000.0)
-                .porcentajeCumplimiento(83.3)
-                .estadoGeneral("AMARILLO")
-                .rentabilidadNeta(null)
-                .productosStockCritico(12)
-                .transaccionesHoy(342)
+                .mensaje("Control de Sucursal: Santiago Centro")
+                .ventasTotales(45000.0)
+                .productosStockCritico(25)
+                .transaccionesHoy(98)
+                .estadoGeneral("ROJO")
                 .build();
     }
 
-    // Rol no reconocido
-    private DashboardDTO crearReporteBase(String rol, boolean datosEnTiempoReal) {
+    /**
+     * ADMIN_SISTEMA: Tu nuevo rol - Foco en Salud del Sistema.
+     */
+    private DashboardDTO crearReporteAdminSistema(boolean datosEnTiempoReal) {
         return DashboardDTO.builder()
-                .tipoReporte("BASE")
-                .rol(rol)
+                .tipoReporte("CONTROL TÉCNICO")
+                .rol("ADMIN_SISTEMA")
                 .generadoEn(LocalDateTime.now())
                 .datosEnTiempoReal(datosEnTiempoReal)
-                .mensaje("Rol no reconocido. Acceso limitado.")
+                .mensaje(datosEnTiempoReal ? "Todos los microservicios sincronizados" : "⚠ Circuit Breaker Activado")
+                .estadoGeneral("VERDE")
+                .build();
+    }
+
+    private DashboardDTO crearReporteBase(String rol, boolean datosEnTiempoReal) {
+        return DashboardDTO.builder()
+                .tipoReporte("BÁSICO")
+                .rol(rol)
+                .generadoEn(LocalDateTime.now())
+                .mensaje("Acceso Limitado. Contacte a soporte.")
                 .build();
     }
 }
