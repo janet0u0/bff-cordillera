@@ -43,27 +43,25 @@ public class MicroservicioClient {
         inicializarCache();
     }
 
-    @SuppressWarnings("unchecked")
     @CircuitBreaker(name = "ms-kpi", fallbackMethod = "kpiFallback")
     public Map<String, Object> obtenerKpis() {
         log.info("Consultando KPIs a MS-KPI en: {}", kpiUrl);
-        Map<String, Object> response = restTemplate.getForObject(
-                kpiUrl + "/api/kpis", Map.class);
-        if (response != null) {
-            cacheKpi.putAll(response);
+        Object[] response = restTemplate.getForObject(
+                kpiUrl + "/api/kpis", Object[].class);
+        if (response != null && response.length > 0) {
+            cacheKpi.put("kpis", response);
             cacheKpi.put("_actualizado", true);
         }
         return cacheKpi;
     }
 
-    @SuppressWarnings("unchecked")
     @CircuitBreaker(name = "ms-datos", fallbackMethod = "datosFallback")
     public Map<String, Object> obtenerDatos() {
         log.info("Consultando datos a MS-Datos en: {}", datosUrl);
-        Map<String, Object> response = restTemplate.getForObject(
-                datosUrl + "/api/datos/ventas/total", Map.class);
-        if (response != null) {
-            cacheDatos.putAll(response);
+        Double total = restTemplate.getForObject(
+                datosUrl + "/api/datos/ventas/total", Double.class);
+        if (total != null) {
+            cacheDatos.put("totalVentas", total);
             cacheDatos.put("_actualizado", true);
         }
         return cacheDatos;
