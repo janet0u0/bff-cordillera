@@ -1,75 +1,115 @@
-markdown# BFF Cordillera - Grupo Cordillera
+markdown# BFF Cordillera - Backend For Frontend
 
-## 📌 Descripción
-Backend For Frontend (BFF) de la Plataforma de Monitoreo Inteligente.
-Consolida y adapta la información de los microservicios según
-el rol del usuario autenticado.
+Backend For Frontend del Grupo Cordillera. Orquesta los microservicios y adapta la respuesta según el rol del usuario.
 
-## 🎯 Patrones aplicados
-- **Factory Method**: ReporteFactory crea el dashboard correcto según el rol
-- **Circuit Breaker**: MicroservicioClient con Resilience4j garantiza disponibilidad
-
-## ⚙️ Tecnologías
+## Tecnologías
 - Java 17
-- Spring Boot 3.5.14
+- Spring Boot 3.3.5
 - Resilience4j (Circuit Breaker)
-- Maven
+- Spring Actuator
+- Docker
 - Lombok
-
-## 📁 Estructura del proyecto
-bff-cordillera/
-├── controller/
-│   └── BffController.java      → Endpoints REST
-├── service/
-│   ├── BffService.java         → Orquestación
-│   └── ReporteFactory.java     → Patrón Factory Method
-├── client/
-│   └── MicroservicioClient.java → Circuit Breaker
-└── dto/
-└── DashboardDTO.java        → Respuesta por rol
-
-## 📊 Dashboards por rol
-| Rol | Tipo | Ve |
-|-----|------|-----|
-| EJECUTIVO | ESTRATÉGICO | Ventas + Rentabilidad |
-| ANALISTA | ANALÍTICO | Ventas + Stock + Transacciones |
-| SUPERVISOR | OPERATIVO | KPIs de su sucursal |
-| ADMIN_SISTEMA | CONTROL TÉCNICO | Estado del sistema |
-
-## 🌐 Endpoints
-| Método | URL | Descripción |
-|--------|-----|-------------|
-| GET | /api/bff/dashboard?rol=EJECUTIVO | Dashboard por rol |
-| GET | /api/bff/health | Estado del BFF |
-| GET | /api/bff/estado | Estado microservicios |
-
-## ⚡ Circuit Breaker
-- Umbral de fallo: 50% en ventana de 10 llamadas
-- Estado ABIERTO: retorna datos del caché
-- Recuperación automática cada 5 segundos
-
-## 🔌 Microservicios que consume
-- MS-Usuarios: http://localhost:8081
-- MS-KPI: http://localhost:8082
-- MS-Datos: http://localhost:8083
-
-## 🐳 Cómo ejecutar
-```bash
-docker-compose up -d
-mvn spring-boot:run
-```
-
-## 💻 Sin Docker
-```bash
-mvn spring-boot:run
-```
-Servidor en: http://localhost:8084
-
-## ✅ Requisitos
-- Java 17+
 - Maven
-- MS-Usuarios, MS-KPI y MS-Datos corriendo
 
-## 👥 Autores
-- Janet Huaylla Huayllas
-- Bairo Pasten Codoceo
+## Patrones Aplicados
+- **Factory Method**: Crea dashboards personalizados según el rol del usuario
+- **Circuit Breaker**: Si MS-KPI o MS-Datos fallan, retorna datos del caché automáticamente
+- **DTO Pattern**: Separa la respuesta de la lógica interna
+
+## Arquitectura
+Frontend
+↓
+BFF (puerto 8084)
+↓           ↓
+MS-KPI      MS-Datos
+(8082)       (8083)
+↓           ↓
+MS-Usuarios (8081)
+
+## Requisitos
+- Java 17
+- Docker Desktop
+- MS-KPI corriendo en puerto 8082
+- MS-Datos corriendo en puerto 8083
+- MS-Usuarios corriendo en puerto 8081
+
+## Instalación y Ejecución
+
+### 1. Clonar el repositorio
+```bash
+git clone <url-del-repositorio>
+cd bff-cordillera
+```
+
+### 2. Asegurarse que los microservicios estén corriendo
+```bash
+# MS-Usuarios
+cd ms-usuarios && .\mvnw spring-boot:run
+
+# MS-KPI
+cd ms-kpi && .\mvnw spring-boot:run
+
+# MS-Datos
+cd ms-datos && .\mvnw spring-boot:run
+```
+
+### 3. Ejecutar el BFF
+```bash
+.\mvnw spring-boot:run
+```
+
+El servicio quedará disponible en `http://localhost:8084`
+
+## Endpoints
+
+| Método | Endpoint | Descripción |
+|--------|----------|-------------|
+| GET | /api/bff/dashboard?rol=EJECUTIVO | Dashboard ejecutivo |
+| GET | /api/bff/dashboard?rol=ANALISTA | Dashboard analista |
+| GET | /api/bff/dashboard?rol=SUPERVISOR | Dashboard supervisor |
+| GET | /api/bff/dashboard?rol=ADMIN_SISTEMA | Dashboard admin sistema |
+| GET | /api/bff/health | Estado del BFF |
+| GET | /api/bff/estado | Estado de microservicios |
+
+## Roles disponibles
+
+| Rol | Tipo Reporte | Descripción |
+|-----|-------------|-------------|
+| EJECUTIVO | ESTRATÉGICO | Foco en rentabilidad y finanzas |
+| ANALISTA | ANALÍTICO | Foco en KPIs y stock global |
+| SUPERVISOR | OPERATIVO | Foco en operación local |
+| ADMIN_SISTEMA | CONTROL TÉCNICO | Salud del sistema |
+
+## Circuit Breaker
+Si MS-KPI o MS-Datos fallan, el sistema retorna automáticamente datos del caché sin interrumpir al usuario.
+
+Estados del circuito:
+- **CERRADO**: Todo funciona, llamadas normales
+- **ABIERTO**: Demasiados fallos, retorna caché
+- **SEMI-ABIERTO**: Probando si el servicio se recuperó
+
+## Estructura del proyecto
+bff-cordillera/
+├── src/
+│   ├── main/
+│   │   ├── java/com/cordillera/bffcordillera/
+│   │   │   ├── client/
+│   │   │   │   └── MicroservicioClient.java
+│   │   │   ├── controller/
+│   │   │   │   └── BffController.java
+│   │   │   ├── dto/
+│   │   │   │   └── DashboardDTO.java
+│   │   │   └── service/
+│   │   │       ├── BffService.java
+│   │   │       └── ReporteFactory.java
+│   │   └── resources/
+│   │       └── application.properties
+│   └── test/
+├── docker-compose.yml
+├── pom.xml
+└── README.md
+
+## Monitoreo
+GET http://localhost:8084/actuator/health
+GET http://localhost:8084/actuator/info
+GET http://localhost:8084/actuator/circuitbreakers
