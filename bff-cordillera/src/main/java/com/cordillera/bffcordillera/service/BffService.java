@@ -6,15 +6,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Servicio principal del BFF
- * Orquesta la consulta a los microservicios
- * y usa ReporteFactory para construir la respuesta.
- *
- * Si MS-KPI o MS-Datos fallan, el Circuit Breaker
- * retorna datos del caché automáticamente.
+ * Servicio principal del BFF - Grupo Cordillera
  */
 @Slf4j
 @Service
@@ -31,22 +27,28 @@ public class BffService {
     public DashboardDTO generarDashboard(String rol) {
         log.info("Generando dashboard para rol: {}", rol);
 
-        // Consultar microservicios (Circuit Breaker activo)
+        // 1. Consultar microservicios (Circuit Breaker activo)
         Map<String, Object> kpiData   = microservicioClient.obtenerKpis();
         Map<String, Object> datosData = microservicioClient.obtenerDatos();
 
-        // Verificar si datos son en tiempo real o del caché
+        // 2. Verificar estado de sincronización
         boolean kpiActualizado    = Boolean.TRUE.equals(kpiData.get("_actualizado"));
         boolean datosActualizado  = Boolean.TRUE.equals(datosData.get("_actualizado"));
         boolean datosEnTiempoReal = kpiActualizado && datosActualizado;
 
-        log.info("Estado - KPI: {} | Datos: {} | TiempoReal: {}",
+        // 3. MEZCLAR DATOS: Aquí combinamos todo en un solo mapa para la Factory
+        Map<String, Object> todosLosDatos = new HashMap<>();
+        todosLosDatos.putAll(kpiData);
+        todosLosDatos.putAll(datosData);
+
+        log.info("Estado - KPI: {} | Datos: {} | TiempoReal: {}", 
                 kpiActualizado, datosActualizado, datosEnTiempoReal);
 
-        // Factory Method: construir respuesta según el rol
-        DashboardDTO dashboard = reporteFactory.crearReporte(rol, datosEnTiempoReal);
+        // 4. FACTORY METHOD: Ahora le pasamos el mapa 'todosLosDatos' 
+        // para que use los 10 millones de Postman en lugar de datos fijos.
+        DashboardDTO dashboard = reporteFactory.crearReporte(rol, datosEnTiempoReal, todosLosDatos);
 
-        log.info("Dashboard generado para rol: {}", rol);
+        log.info("Dashboard generado exitosamente para rol: {}", rol);
         return dashboard;
     }
 }
