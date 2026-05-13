@@ -1,4 +1,4 @@
-markdown# BFF Cordillera - Backend For Frontend
+BFF Cordillera - Backend For Frontend
 
 Backend For Frontend del Grupo Cordillera. Orquesta los microservicios y adapta la respuesta según el rol del usuario.
 
