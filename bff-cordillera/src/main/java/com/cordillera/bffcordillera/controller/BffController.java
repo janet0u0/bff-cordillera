@@ -20,12 +20,13 @@ import java.util.Map;
  * Patrón aplicado: Circuit Breaker
  * Si MS-KPI o MS-Datos fallan, el sistema retorna
  * datos del caché sin interrumpir al usuario.
+ * 
+ * CORS configurado en CorsConfig.java
  */
 @Slf4j
 @RestController
 @RequestMapping("/api/bff")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "*")
 public class BffController {
 
     private final BffService bffService;
@@ -33,7 +34,7 @@ public class BffController {
     /**
      * GET /api/bff/dashboard?rol=EJECUTIVO
      * Retorna dashboard adaptado al rol del usuario.
-     * Roles: EJECUTIVO | ANALISTA | SUPERVISOR
+     * Roles: EJECUTIVO | ANALISTA | SUPERVISOR | ADMIN_SISTEMA
      */
     @GetMapping("/dashboard")
     public ResponseEntity<DashboardDTO> obtenerDashboard(
@@ -55,7 +56,6 @@ public class BffController {
     /**
      * GET /api/bff/estado
      * Verifica el estado de los microservicios downstream
-     * Muestra si MS-KPI y MS-Datos están UP o DEGRADED
      */
     @GetMapping("/estado")
     public ResponseEntity<Map<String, String>> estado() {
