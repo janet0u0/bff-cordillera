@@ -88,26 +88,32 @@ Estados del circuito:
 - **ABIERTO**: Demasiados fallos, retorna caché
 - **SEMI-ABIERTO**: Probando si el servicio se recuperó
 
-## Estructura del proyecto
+## 📂 Estructura del Proyecto BFF-Cordillera
+
+```text
 bff-cordillera/
 ├── src/
 │   ├── main/
-│   │   ├── java/com/cordillera/bffcordillera/
-│   │   │   ├── client/
-│   │   │   │   └── MicroservicioClient.java
-│   │   │   ├── controller/
-│   │   │   │   └── BffController.java
-│   │   │   ├── dto/
-│   │   │   │   └── DashboardDTO.java
-│   │   │   └── service/
-│   │   │       ├── BffService.java
-│   │   │       └── ReporteFactory.java
+│   │   ├── client/
+│   │   ├── controller/
+│   │   ├── dto/
+│   │   ├── service/
 │   │   └── resources/
-│   │       └── application.properties
 │   └── test/
 ├── docker-compose.yml
 ├── pom.xml
 └── README.md
+```
+
+## 📌 Componentes principales
+
+```text
+client/       → Comunicación con microservicios
+controller/   → Endpoints REST del BFF
+dto/          → Objetos de transferencia de datos
+service/      → Lógica de negocio y reportes
+resources/    → Configuración del sistema
+```
 
 ## Monitoreo
 GET http://localhost:8084/actuator/health
