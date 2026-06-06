@@ -1,6 +1,5 @@
 services:
 
-  # MySQL para MS-Usuarios
   mysql-usuarios:
     image: mysql:8.0
     container_name: mysql-ms-usuarios
@@ -12,8 +11,15 @@ services:
       - "3306:3306"
     volumes:
       - mysql_usuarios_data:/var/lib/mysql
+    networks:
+      - cordillera-net
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
 
-  # MySQL para MS-KPI
   mysql-kpi:
     image: mysql:8.0
     container_name: mysql-ms-kpi
@@ -25,8 +31,15 @@ services:
       - "3307:3306"
     volumes:
       - mysql_kpi_data:/var/lib/mysql
+    networks:
+      - cordillera-net
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
 
-  # MySQL para MS-Datos
   mysql-datos:
     image: mysql:8.0
     container_name: mysql-ms-datos
@@ -38,8 +51,106 @@ services:
       - "3308:3306"
     volumes:
       - mysql_datos_data:/var/lib/mysql
+    networks:
+      - cordillera-net
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+  ms-usuarios:
+    build:
+      context: "C:\\Users\\janet\\OneDrive\\Escritorio\\plataforma Grupo Cordillera\\bakend\\ms-usuarios\\ms-usuarios"
+      dockerfile: Dockerfile
+    container_name: ms-usuarios
+    restart: unless-stopped
+    ports:
+      - "8081:8081"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql-usuarios:3306/grupo_cordillera?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      DB_USERNAME: root
+      DB_PASSWORD: root
+    depends_on:
+      mysql-usuarios:
+        condition: service_healthy
+    networks:
+      - cordillera-net
+
+  ms-kpi:
+    build:
+      context: "C:\\Users\\janet\\OneDrive\\Escritorio\\plataforma Grupo Cordillera\\bakend\\ms-kpi\\ms-kpi"
+      dockerfile: Dockerfile
+    container_name: ms-kpi
+    restart: unless-stopped
+    ports:
+      - "8082:8082"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql-kpi:3306/ms_kpi_db?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC&createDatabaseIfNotExist=true
+      DB_USERNAME: root
+      DB_PASSWORD: root
+    depends_on:
+      mysql-kpi:
+        condition: service_healthy
+    networks:
+      - cordillera-net
+
+  ms-datos:
+    build:
+      context: "C:\\Users\\janet\\OneDrive\\Escritorio\\plataforma Grupo Cordillera\\bakend\\ms-datos\\ms-datos"
+      dockerfile: Dockerfile
+    container_name: ms-datos
+    restart: unless-stopped
+    ports:
+      - "8083:8083"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql-datos:3306/ms_datos_db?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      DB_USERNAME: root
+      DB_PASSWORD: root
+    depends_on:
+      mysql-datos:
+        condition: service_healthy
+    networks:
+      - cordillera-net
+
+  bff-cordillera:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: bff-cordillera
+    restart: unless-stopped
+    ports:
+      - "8084:8084"
+    environment:
+      MICROSERVICIO_USUARIOS_URL: http://ms-usuarios:8081
+      MICROSERVICIO_KPI_URL: http://ms-kpi:8082
+      MICROSERVICIO_DATOS_URL: http://ms-datos:8083
+    depends_on:
+      - ms-usuarios
+      - ms-kpi
+      - ms-datos
+    networks:
+      - cordillera-net
+
+  frontend:
+    build:
+      context: "C:\\Users\\janet\\OneDrive\\Escritorio\\plataforma Grupo Cordillera\\fronted\\frontend-cordillera\\frontend-cordillera-master"
+      dockerfile: Dockerfile
+    container_name: frontend-cordillera
+    restart: unless-stopped
+    ports:
+      - "3000:80"
+    depends_on:
+      - bff-cordillera
+    networks:
+      - cordillera-net
 
 volumes:
   mysql_usuarios_data:
   mysql_kpi_data:
   mysql_datos_data:
+
+networks:
+  cordillera-net:
+    driver: bridge
