@@ -1,8 +1,8 @@
-BFF Cordillera - Backend For Frontend
+# 🏔️ BFF Cordillera - Backend For Frontend
 
 Backend For Frontend del Grupo Cordillera. Orquesta los microservicios y adapta la respuesta según el rol del usuario.
 
-## Tecnologías
+## 🛠️ Tecnologías
 - Java 17
 - Spring Boot 3.3.5
 - Resilience4j (Circuit Breaker)
@@ -11,67 +11,68 @@ Backend For Frontend del Grupo Cordillera. Orquesta los microservicios y adapta 
 - Lombok
 - Maven
 
-## Patrones Aplicados
+## 🎯 Patrones Aplicados
 - **Factory Method**: Crea dashboards personalizados según el rol del usuario
 - **Circuit Breaker**: Si MS-KPI o MS-Datos fallan, retorna datos del caché automáticamente
 - **DTO Pattern**: Separa la respuesta de la lógica interna
 
-## Arquitectura
-Frontend
-↓
-BFF (puerto 8084)
-↓           ↓
-MS-KPI      MS-Datos
-(8082)       (8083)
-↓           ↓
+## 🏗️ Arquitectura
+```text
+Frontend (3000)
+      ↓
+BFF (8084)
+  ↓       ↓
+MS-KPI  MS-Datos
+(8082)   (8083)
 MS-Usuarios (8081)
+```
 
-## Requisitos
+## ✅ Requisitos
 - Java 17
 - Docker Desktop
-- MS-KPI corriendo en puerto 8082
-- MS-Datos corriendo en puerto 8083
-- MS-Usuarios corriendo en puerto 8081
+- Maven
 
-## Instalación y Ejecución
+## 🚀 Instalación y Ejecución
 
-### 1. Clonar el repositorio
+### Opción 1: Docker (recomendado)
 ```bash
-git clone <url-del-repositorio>
+docker compose up --build
+```
+Levanta todo el sistema automáticamente.
+
+### Opción 2: Local
+
+**1. Clonar el repositorio**
+```bash
+git clone https://github.com/janet0u0/bff-cordillera
 cd bff-cordillera
 ```
 
-### 2. Asegurarse que los microservicios estén corriendo
+**2. Levantar los microservicios**
 ```bash
-# MS-Usuarios
 cd ms-usuarios && .\mvnw spring-boot:run
-
-# MS-KPI
 cd ms-kpi && .\mvnw spring-boot:run
-
-# MS-Datos
 cd ms-datos && .\mvnw spring-boot:run
 ```
 
-### 3. Ejecutar el BFF
+**3. Ejecutar el BFF**
 ```bash
 .\mvnw spring-boot:run
 ```
+Disponible en `http://localhost:8084`
 
-El servicio quedará disponible en `http://localhost:8084`
-
-## Endpoints
+## 🔗 Endpoints
 
 | Método | Endpoint | Descripción |
 |--------|----------|-------------|
 | GET | /api/bff/dashboard?rol=EJECUTIVO | Dashboard ejecutivo |
 | GET | /api/bff/dashboard?rol=ANALISTA | Dashboard analista |
 | GET | /api/bff/dashboard?rol=SUPERVISOR | Dashboard supervisor |
-| GET | /api/bff/dashboard?rol=ADMIN_SISTEMA | Dashboard admin sistema |
+| GET | /api/bff/dashboard?rol=ADMIN_SISTEMA | Dashboard administrador |
 | GET | /api/bff/health | Estado del BFF |
 | GET | /api/bff/estado | Estado de microservicios |
 
-## Roles disponibles
+## 👥 Roles disponibles
 
 | Rol | Tipo Reporte | Descripción |
 |-----|-------------|-------------|
@@ -80,15 +81,17 @@ El servicio quedará disponible en `http://localhost:8084`
 | SUPERVISOR | OPERATIVO | Foco en operación local |
 | ADMIN_SISTEMA | CONTROL TÉCNICO | Salud del sistema |
 
-## Circuit Breaker
+## 🔄 Circuit Breaker
+
 Si MS-KPI o MS-Datos fallan, el sistema retorna automáticamente datos del caché sin interrumpir al usuario.
 
-Estados del circuito:
-- **CERRADO**: Todo funciona, llamadas normales
-- **ABIERTO**: Demasiados fallos, retorna caché
-- **SEMI-ABIERTO**: Probando si el servicio se recuperó
+| Estado | Descripción |
+|--------|-------------|
+| CERRADO | Todo funciona, llamadas normales |
+| ABIERTO | Demasiados fallos, retorna caché |
+| SEMI-ABIERTO | Probando si el servicio se recuperó |
 
-## 📂 Estructura del Proyecto BFF-Cordillera
+## 📂 Estructura del Proyecto
 
 ```text
 bff-cordillera/
@@ -101,6 +104,7 @@ bff-cordillera/
 │   │   └── resources/
 │   └── test/
 ├── docker-compose.yml
+├── Dockerfile
 ├── pom.xml
 └── README.md
 ```
@@ -115,7 +119,10 @@ service/      → Lógica de negocio y reportes
 resources/    → Configuración del sistema
 ```
 
-## Monitoreo
+## 📡 Monitoreo
+
+```
 GET http://localhost:8084/actuator/health
 GET http://localhost:8084/actuator/info
 GET http://localhost:8084/actuator/circuitbreakers
+```
