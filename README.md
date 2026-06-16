@@ -21,58 +21,42 @@ Además, actúa como **entrypoint del sistema mediante Docker**, permitiendo lev
 
 ---
 
-## 🎯 Arquitectura del sistema
+## 🏗️ Arquitectura del sistema
 
-Frontend  
-↓  
-BFF Cordillera (8084)  
-↓        ↓        ↓  
-MS-KPI   MS-Datos   MS-Usuarios  
-(8082)    (8083)       (8081)
-
----
-
-## 🧠 Patrones de diseño
-
-- Backend For Frontend (BFF)
-- Factory Pattern (dashboards por rol)
-- Circuit Breaker (Resilience4j)
-- DTO Pattern
-- Client Layer
-
----
-
-## 📂 Estructura del proyecto
-
+```text
+Frontend
+   ↓
+BFF Cordillera (8084)
+   ├── MS-KPI (8082)
+   ├── MS-Datos (8083)
+   └── MS-Usuarios (8081)
+```
+🧠 Patrones de diseño
+Backend For Frontend (BFF)
+Factory Pattern (dashboards por rol)
+Circuit Breaker (Resilience4j)
+DTO Pattern
+Client Layer
+```
+📂 Estructura del proyecto
 bff-cordillera/
 ├── .mvn/
 ├── src/
 │   ├── main/
 │   │   ├── java/com/cordillera/bffcordillera/
 │   │   │   ├── client/
-│   │   │   │   └── MicroservicioClient.java
 │   │   │   ├── config/
-│   │   │   │   └── CorsConfig.java
 │   │   │   ├── controller/
-│   │   │   │   └── BffController.java
 │   │   │   ├── dto/
-│   │   │   │   └── DashboardDTO.java
 │   │   │   ├── service/
-│   │   │   │   ├── BffService.java
-│   │   │   │   └── ReporteFactory.java
 │   │   │   └── BffCordilleraApplication.java
 │   │   └── resources/
-│   │       ├── static/
 │   │       └── application.properties
 │   └── test/
 │       ├── java/com/cordillera/bffcordillera/
 │       │   ├── client/
-│       │   │   └── MicroservicioClientTest.java
 │       │   ├── controller/
-│       │   │   └── DashboardControllerTest.java
 │       │   ├── service/
-│       │   │   ├── BffServiceTest.java
-│       │   │   └── ReporteFactoryTest.java
 │       │   └── BffCordilleraApplicationTests.java
 │       └── resources/
 │           └── application-test.properties
@@ -82,40 +66,32 @@ bff-cordillera/
 ├── mvnw.cmd
 ├── pom.xml
 └── README.md
-
----
-
-## 📊 Cobertura de tests (JaCoCo)
-
-- Global: ~99%
-- Service: 100%
-- Controller: 100%
-- Client: 100%
-- Factory: 99%
-- Main: cobertura parcial (normal en Spring Boot)
-
----
-
-## 🚀 Ejecución del proyecto
-
-### 🐳 Docker (RECOMENDADO)
-
-```bash
+```
+📊 Cobertura de tests (JaCoCo)
+Global: ~99%
+Service: 100%
+Controller: 100%
+Client: 100%
+Factory: 99%
+Main: cobertura parcial (normal en Spring Boot)
+🚀 Ejecución del proyecto
+🐳 Docker (RECOMENDADO)
 docker compose up --build
 
-Levanta todo el sistema:
+✔ Levanta todo el sistema:
 
 BFF Cordillera
-Microservicios (MS-KPI, MS-Datos, MS-Usuarios)
+MS-KPI
+MS-Datos
+MS-Usuarios
 💻 Ejecución local
 .\mvnw spring-boot:run
 🧪 Tests + JaCoCo
 .\mvnw test jacoco:report
 
-📄 Reporte:
+📄 Reporte generado en:
 
 target/site/jacoco/index.html
-
 🔗 Endpoints
 Método	Endpoint	Descripción
 GET	/api/bff/dashboard?rol=EJECUTIVO	Dashboard ejecutivo
