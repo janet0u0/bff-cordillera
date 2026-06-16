@@ -1,128 +1,149 @@
 # 🏔️ BFF Cordillera - Backend For Frontend
 
-Backend For Frontend del Grupo Cordillera. Orquesta los microservicios y adapta la respuesta según el rol del usuario.
+El **BFF Cordillera** es el punto central de la arquitectura de microservicios. Su función es **orquestar los microservicios**, consolidar respuestas y adaptar la información según el rol del usuario.
+
+Además, actúa como **entrypoint del sistema mediante Docker**, permitiendo levantar toda la arquitectura desde este componente.
+
+---
 
 ## 🛠️ Tecnologías
-- Java 17
-- Spring Boot 3.3.5
-- Resilience4j (Circuit Breaker)
-- Spring Actuator
-- Docker
-- Lombok
-- Maven
 
-## 🎯 Patrones Aplicados
-- **Factory Method**: Crea dashboards personalizados según el rol del usuario
-- **Circuit Breaker**: Si MS-KPI o MS-Datos fallan, retorna datos del caché automáticamente
-- **DTO Pattern**: Separa la respuesta de la lógica interna
+- Java 17  
+- Spring Boot 3.3.5  
+- Maven Wrapper (`mvnw`)  
+- Resilience4j (Circuit Breaker)  
+- Spring Boot Actuator  
+- JUnit 5  
+- Mockito  
+- JaCoCo (cobertura de tests)  
+- Docker & Docker Compose  
+- Lombok  
 
-## 🏗️ Arquitectura
-```text
-Frontend (3000)
-      ↓
-BFF (8084)
-  ↓       ↓
-MS-KPI  MS-Datos
-(8082)   (8083)
-MS-Usuarios (8081)
-```
+---
 
-## ✅ Requisitos
-- Java 17
-- Docker Desktop
-- Maven
+## 🎯 Arquitectura del sistema
 
-## 🚀 Instalación y Ejecución
+Frontend  
+↓  
+BFF Cordillera (8084)  
+↓        ↓        ↓  
+MS-KPI   MS-Datos   MS-Usuarios  
+(8082)    (8083)       (8081)
 
-### Opción 1: Docker (recomendado)
-```bash
-docker compose up --build
-```
-Levanta todo el sistema automáticamente.
+---
 
-### Opción 2: Local
+## 🧠 Patrones de diseño
 
-**1. Clonar el repositorio**
-```bash
-git clone https://github.com/janet0u0/bff-cordillera
-cd bff-cordillera
-```
+- Backend For Frontend (BFF)
+- Factory Pattern (dashboards por rol)
+- Circuit Breaker (Resilience4j)
+- DTO Pattern
+- Client Layer
 
-**2. Levantar los microservicios**
-```bash
-cd ms-usuarios && .\mvnw spring-boot:run
-cd ms-kpi && .\mvnw spring-boot:run
-cd ms-datos && .\mvnw spring-boot:run
-```
+---
 
-**3. Ejecutar el BFF**
-```bash
-.\mvnw spring-boot:run
-```
-Disponible en `http://localhost:8084`
+## 📂 Estructura del proyecto
 
-## 🔗 Endpoints
-
-| Método | Endpoint | Descripción |
-|--------|----------|-------------|
-| GET | /api/bff/dashboard?rol=EJECUTIVO | Dashboard ejecutivo |
-| GET | /api/bff/dashboard?rol=ANALISTA | Dashboard analista |
-| GET | /api/bff/dashboard?rol=SUPERVISOR | Dashboard supervisor |
-| GET | /api/bff/dashboard?rol=ADMIN_SISTEMA | Dashboard administrador |
-| GET | /api/bff/health | Estado del BFF |
-| GET | /api/bff/estado | Estado de microservicios |
-
-## 👥 Roles disponibles
-
-| Rol | Tipo Reporte | Descripción |
-|-----|-------------|-------------|
-| EJECUTIVO | ESTRATÉGICO | Foco en rentabilidad y finanzas |
-| ANALISTA | ANALÍTICO | Foco en KPIs y stock global |
-| SUPERVISOR | OPERATIVO | Foco en operación local |
-| ADMIN_SISTEMA | CONTROL TÉCNICO | Salud del sistema |
-
-## 🔄 Circuit Breaker
-
-Si MS-KPI o MS-Datos fallan, el sistema retorna automáticamente datos del caché sin interrumpir al usuario.
-
-| Estado | Descripción |
-|--------|-------------|
-| CERRADO | Todo funciona, llamadas normales |
-| ABIERTO | Demasiados fallos, retorna caché |
-| SEMI-ABIERTO | Probando si el servicio se recuperó |
-
-## 📂 Estructura del Proyecto
-
-```text
 bff-cordillera/
+├── .mvn/
 ├── src/
 │   ├── main/
-│   │   ├── client/
-│   │   ├── controller/
-│   │   ├── dto/
-│   │   ├── service/
+│   │   ├── java/com/cordillera/bffcordillera/
+│   │   │   ├── client/
+│   │   │   │   └── MicroservicioClient.java
+│   │   │   ├── config/
+│   │   │   │   └── CorsConfig.java
+│   │   │   ├── controller/
+│   │   │   │   └── BffController.java
+│   │   │   ├── dto/
+│   │   │   │   └── DashboardDTO.java
+│   │   │   ├── service/
+│   │   │   │   ├── BffService.java
+│   │   │   │   └── ReporteFactory.java
+│   │   │   └── BffCordilleraApplication.java
 │   │   └── resources/
+│   │       ├── static/
+│   │       └── application.properties
 │   └── test/
+│       ├── java/com/cordillera/bffcordillera/
+│       │   ├── client/
+│       │   │   └── MicroservicioClientTest.java
+│       │   ├── controller/
+│       │   │   └── DashboardControllerTest.java
+│       │   ├── service/
+│       │   │   ├── BffServiceTest.java
+│       │   │   └── ReporteFactoryTest.java
+│       │   └── BffCordilleraApplicationTests.java
+│       └── resources/
+│           └── application-test.properties
 ├── docker-compose.yml
 ├── Dockerfile
+├── mvnw
+├── mvnw.cmd
 ├── pom.xml
 └── README.md
-```
 
-## 📌 Componentes principales
+---
 
-```text
-client/       → Comunicación con microservicios
-controller/   → Endpoints REST del BFF
-dto/          → Objetos de transferencia de datos
-service/      → Lógica de negocio y reportes
-resources/    → Configuración del sistema
-```
+## 📊 Cobertura de tests (JaCoCo)
 
-## 📡 Monitoreo
+- Global: ~99%
+- Service: 100%
+- Controller: 100%
+- Client: 100%
+- Factory: 99%
+- Main: cobertura parcial (normal en Spring Boot)
 
-```
-GET http://localhost:8084/actuator/health
-GET http://localhost:8084/actuator/info
-GET http://localhost:8084/actuator/circuitbreakers
-```
+---
+
+## 🚀 Ejecución del proyecto
+
+### 🐳 Docker (RECOMENDADO)
+
+```bash
+docker compose up --build
+
+Levanta todo el sistema:
+
+BFF Cordillera
+Microservicios (MS-KPI, MS-Datos, MS-Usuarios)
+💻 Ejecución local
+.\mvnw spring-boot:run
+🧪 Tests + JaCoCo
+.\mvnw test jacoco:report
+
+📄 Reporte:
+
+target/site/jacoco/index.html
+
+🔗 Endpoints
+Método	Endpoint	Descripción
+GET	/api/bff/dashboard?rol=EJECUTIVO	Dashboard ejecutivo
+GET	/api/bff/dashboard?rol=ANALISTA	Dashboard analista
+GET	/api/bff/dashboard?rol=SUPERVISOR	Dashboard supervisor
+GET	/api/bff/dashboard?rol=ADMIN_SISTEMA	Dashboard administrador
+GET	/api/bff/health	Estado del BFF
+GET	/api/bff/estado	Estado de microservicios
+👥 Roles
+EJECUTIVO → estratégico
+ANALISTA → analítico
+SUPERVISOR → operativo
+ADMIN_SISTEMA → control técnico
+🔄 Circuit Breaker
+CLOSED → funcionamiento normal
+OPEN → fallback activo (caché)
+HALF-OPEN → recuperación del sistema
+🧪 Testing
+Unit tests (Service)
+Integration tests (Controller)
+Client tests (Mock HTTP)
+Factory tests (reglas de negocio)
+🐳 Docker
+Build
+docker build -t bff-cordillera .
+Run
+docker run -p 8084:8084 bff-cordillera
+📡 Actuator
+http://localhost:8084/actuator/health
+http://localhost:8084/actuator/info
+http://localhost:8084/actuator/circuitbreakers
