@@ -31,6 +31,7 @@ BFF Cordillera (8084)
    ├── MS-Datos (8083)
    └── MS-Usuarios (8081)
 ```
+```
 🧠 Patrones de diseño
 Backend For Frontend (BFF)
 Factory Pattern (dashboards por rol)
@@ -66,6 +67,7 @@ bff-cordillera/
 ├── mvnw.cmd
 ├── pom.xml
 └── README.md
+```
 ```
 📊 Cobertura de tests (JaCoCo)
 Global: ~99%
