@@ -43,7 +43,7 @@ BFF Cordillera (8084)
 ---
 
 ## 📂 Estructura del proyecto
-
+```
 
 bff-cordillera/
 ├── .mvn/
@@ -73,7 +73,7 @@ bff-cordillera/
 ├── pom.xml
 └── README.md
 
-
+```
 ---
 
 ## 📊 Cobertura de tests (JaCoCo)
@@ -133,3 +133,4 @@ Factory tests (reglas de negocio)
 🐳 Docker
 docker build -t bff-cordillera .
 docker run -p 8084:8084 bff-cordillera
+```
